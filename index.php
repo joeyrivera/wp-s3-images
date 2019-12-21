@@ -3,13 +3,14 @@
  * Plugin Name: JR Image Upload
  * Plugin URI: http://www.mywebsite.com/my-first-plugin
  * Description: Allows admin to upload images to S3
- * Version: 1.0
+ * Version: 1.1
  * Author: Joey Rivera
  * Author URI: http://www.joeyrivera.com
  */
 
-add_action( 'the_content', 'my_thank_you_text' );
+require_once 'Jr_S3_Image_List.php';
 
-function my_thank_you_text ( $content ) {
-    return $content .= '<p>Thank you for reading!</p>';
-}
+// register My_Widget
+add_action( 'widgets_init', function(){
+	register_widget( 'Jr_S3_Image_List' );
+});
