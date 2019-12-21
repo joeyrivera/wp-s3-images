@@ -26,8 +26,6 @@ class Jr_S3_Image_List extends WP_Widget
             'identity_pool_id' => "",
             'number_of_images' => ($instance['number_of_images'] ?? $this->default_number_of_images)
         ];
-        wp_localize_script('jrimageuploadjs', 'document_obj', $variables);
-        wp_enqueue_script('jrimageuploadjs');
 
         echo $args['before_widget'];
 
@@ -39,9 +37,25 @@ class Jr_S3_Image_List extends WP_Widget
         }
 
         echo $title;
+
+        // upload for admin
+        if (current_user_can('administrator')) {
+            echo '<input id="photoupload" type="file" accept="image/*">'
+                . '<button id="addphoto" onclick="addPhoto()">'
+                . "Add Photo"
+                . "</button>";
+
+            // use elevated policy
+            $variables['identity_pool_id'] = '';
+        }
+
+
         echo "<ul id='app' style='list-style-type: none; margin: 0px'></ul>";
 
         echo $args['after_widget'];
+
+        wp_localize_script('jrimageuploadjs', 'document_obj', $variables);
+        wp_enqueue_script('jrimageuploadjs');
     }
 
     // output the option form field in admin Widgets screen

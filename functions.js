@@ -14,10 +14,8 @@ var s3 = new AWS.S3({
   params: { Bucket: albumBucketName }
 });
 
-function viewAlbum(albumName) {
-  //var albumPhotosKey = encodeURIComponent(albumName) + "/";
+function viewAlbum() {
   s3.listObjects({
-    Prefix: albumName,
     MaxKeys: 1000,
   }, function (err, data) {
 
@@ -27,7 +25,7 @@ function viewAlbum(albumName) {
 
     // 'this' references the AWS.Response instance that represents the response
     var href = this.request.httpRequest.endpoint.href;
-    var bucketUrl = href + albumBucketName + "/";
+    var bucketUrl = href + albumBucketName + "-resized/";
 
     // filter out invalid photos
     var filteredPhotos = data.Contents.filter(function (photo) {
@@ -69,7 +67,40 @@ function viewAlbum(albumName) {
   });
 }
 
+function addPhoto() {
+  var files = document.getElementById("photoupload").files;
+  if (!files.length) {
+    return alert("Please choose a file to upload first.");
+  }
+  var file = files[0];
+  var fileName = file.name;
+  var photoKey = fileName;
+
+  // Use S3 ManagedUpload class as it supports multipart uploads
+  var upload = new AWS.S3.ManagedUpload({
+    params: {
+      Bucket: albumBucketName,
+      Key: photoKey,
+      Body: file,
+      ACL: "public-read"
+    }
+  });
+
+  var promise = upload.promise();
+
+  promise.then(
+    function (data) {
+      alert("Successfully uploaded photo.");
+      viewAlbum();
+    },
+    function (err) {
+      return alert("There was an error uploading your photo: ", err.message);
+    }
+  );
+}
+
 function getHtml(template) {
   return template.join('\n');
 }
-viewAlbum(null);
+
+viewAlbum();
