@@ -69,9 +69,11 @@ function viewAlbum() {
 
 function addPhoto() {
   var files = document.getElementById("photoupload").files;
+  
   if (!files.length) {
     return alert("Please choose a file to upload first.");
   }
+
   var file = files[0];
   var fileName = file.name;
   var photoKey = fileName;
@@ -90,7 +92,7 @@ function addPhoto() {
 
   promise.then(
     function (data) {
-      alert("Successfully uploaded photo.");
+      //alert("Successfully uploaded photo.");
       viewAlbum();
     },
     function (err) {
