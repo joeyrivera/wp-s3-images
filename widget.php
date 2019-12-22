@@ -54,8 +54,41 @@ class Widget extends \WP_Widget
 
         // upload for admin
         if (current_user_can('administrator')) {
-            echo '<input id="photoupload" type="file" accept="image/*">'
-                . '<button id="addphoto" onclick="addPhoto()">Add Photo</button>';
+?>
+            <style>
+                #drop-area {
+                    border: 2px dashed #ccc;
+                    border-radius: 20px;
+                    width: 100%;
+                    font-family: sans-serif;
+                    margin: 0 0 20px 0;
+                    padding: 20px;
+                }
+
+                #drop-area.highlight {
+                    border-color: purple;
+                }
+
+                #progress-bar {
+                    width: 100%;
+                }
+
+                #drop-zone .hidden {
+                    display: none;
+                }
+            </style>
+
+            <div id="drop-zone">
+                <div id="drop-area" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+                    <p>Drag images here to upload</p>
+                </div>
+
+                <div class="hidden">
+                    Upload Progress:
+                    <progress id="progress-bar" max=100 value=0></progress>
+                </div>
+            </div>
+        <?php
 
             // use elevated policy if admin
             $variables['identity_pool_id'] = get_option('identity_pool_id_admin');
@@ -68,7 +101,7 @@ class Widget extends \WP_Widget
 
         // register JS files
         wp_enqueue_script('awssdk', 'https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js');
-        wp_register_script('jrs3imagesjs', plugin_dir_url(__FILE__) . 'functions.js');  
+        wp_register_script('jrs3imagesjs', plugin_dir_url(__FILE__) . 'functions.js');
         wp_localize_script('jrs3imagesjs', 'document_obj', $variables);
         wp_enqueue_script('jrs3imagesjs');
     }
@@ -80,7 +113,7 @@ class Widget extends \WP_Widget
     {
         $title = (isset($instance['title'])) ? $instance['title'] : __($this->default_title,);
         $number_of_images = !empty($instance['number_of_images']) ? $instance['number_of_images'] : $this->default_number_of_images;
-?>
+        ?>
         <p>
             <label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:'); ?></label>
             <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>" />
@@ -92,7 +125,7 @@ class Widget extends \WP_Widget
         </p>
     <?php
     }
-    
+
     /**
      * show a form under settings to set params
      */
