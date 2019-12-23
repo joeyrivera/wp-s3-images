@@ -79,6 +79,8 @@ function addPhotos(files) {
     var timeoutIds = [];
     var progressText = document.getElementById('progress-text');
     var progressBar = document.getElementById('progress-bar');
+    var progressThumbsText = document.getElementById('progress-thumbs-text');
+    var progressThumbsBar = document.getElementById('progress-thumbs-bar');
 
     var pollForThumb = function (file) {
         var http = new XMLHttpRequest();
@@ -87,6 +89,7 @@ function addPhotos(files) {
             if (this.readyState == this.DONE && this.status == 200) {
                 clearInterval(timeoutIds[file.ETag]);
                 thumbnailsFound++;
+                progressThumbsBar.value = thumbnailsFound / totalImages * 100;
 
                 if (thumbnailsFound == totalImages) {
                     resetProgress();
@@ -114,8 +117,12 @@ function addPhotos(files) {
     };
 
     var resetProgress = function () {
+        uploadedImages = 0;
+        thumbnailsFound = 0;
+        timeoutIds = [];
         progressText.innerHTML = 'Upload progress:';
         progressBar.value = 0;
+        progressThumbsBar.value = 0;
         progressBar.parentElement.classList.add('hidden');
     }
 

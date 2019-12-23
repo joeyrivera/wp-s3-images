@@ -73,6 +73,10 @@ class Widget extends \WP_Widget
                     width: 100%;
                 }
 
+                #progress-thumbs-bar {
+                    width: 100%;
+                }
+
                 #drop-zone .hidden {
                     display: none;
                 }
@@ -86,6 +90,9 @@ class Widget extends \WP_Widget
                 <div class="hidden">
                     <span id="progress-text">Upload Progress:</span>
                     <progress id="progress-bar" max=100 value=0></progress>
+
+                    <span id="progress-thumbs-text">Thumbnails Progress:</span>
+                    <progress id="progress-thumbs-bar" max=100 value=0></progress>
                 </div>
             </div>
         <?php
