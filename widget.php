@@ -84,7 +84,7 @@ class Widget extends \WP_Widget
                 </div>
 
                 <div class="hidden">
-                    Upload Progress:
+                    <span id="progress-text">Upload Progress:</span>
                     <progress id="progress-bar" max=100 value=0></progress>
                 </div>
             </div>

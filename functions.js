@@ -68,32 +68,68 @@ function viewAlbum() {
     });
 }
 
+/**
+ * @todo only retry so many times to find thumbnails
+ * @param {*} files 
+ */
 function addPhotos(files) {
     var totalImages = files.length;
     var uploadedImages = 0;
+    var thumbnailsFound = 0;
+    var timeoutIds = [];
+    var progressText = document.getElementById('progress-text');
     var progressBar = document.getElementById('progress-bar');
 
-    var success = function (data) {
+    var pollForThumb = function (file) {
+        var http = new XMLHttpRequest();
+        http.open('HEAD', file.Location.replace(imagesBucketName, thumbsBucketName));
+        http.onreadystatechange = function () {
+            if (this.readyState == this.DONE && this.status == 200) {
+                clearInterval(timeoutIds[file.ETag]);
+                thumbnailsFound++;
+
+                if (thumbnailsFound == totalImages) {
+                    resetProgress();
+                    viewAlbum();
+                }
+            }
+        };
+
+        http.send();
+    };
+
+    var success = function (file) {
         uploadedImages++;
         progressBar.value = uploadedImages / totalImages * 100;
+
+        if (progressBar.value == 100) {
+            progressText.innerHTML = 'Waiting for thumbnails.';
+        }
+
+        timeoutIds[file.ETag] = setInterval(pollForThumb, 1000, file);
     };
 
     var failed = function (error) {
         console.log(error);
     };
 
-    // show that progress bar
-    progressBar.value = 0;
+    var resetProgress = function () {
+        progressText.innerHTML = 'Upload progress:';
+        progressBar.value = 0;
+        progressBar.parentElement.classList.add('hidden');
+    }
+
+    // init UI
+    resetProgress();
     progressBar.parentElement.classList.remove('hidden');
 
     // start adding photos
     files.forEach(file => {
         addPhoto(file, success, failed);
-    });    
+    });
 }
 
-function addPhoto(file, success, failed)
-{
+function addPhoto(file, success, failed) {
     var fileName = file.name.replace(/[^\w\.]/gi, '_');
     var photoKey = fileName;
 
@@ -120,7 +156,6 @@ function getHtml(template) {
 }
 
 viewAlbum();
-
 
 // admin functions
 function dragOverHandler(ev) {
@@ -166,8 +201,7 @@ function dropHandler(ev) {
     }
 }
 
-function validateImageFile(file)
-{
+function validateImageFile(file) {
     if (typeof file['type'] !== 'undefined' && file.type.startsWith('image/')) {
         return true;
     }
@@ -181,9 +215,9 @@ let dropArea = document.getElementById('drop-area');
     dropArea.addEventListener(eventName, highlight, false);
 })
 
-;['dragleave', 'drop'].forEach(eventName => {
-    dropArea.addEventListener(eventName, unhighlight, false);
-})
+    ;['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    })
 
 function highlight(e) {
     dropArea.classList.add('highlight');
