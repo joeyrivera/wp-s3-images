@@ -1,0 +1,24 @@
+#drop-area {
+    border: 2px dashed #ccc;
+    border-radius: 20px;
+    width: 100%;
+    font-family: sans-serif;
+    margin: 0 0 20px 0;
+    padding: 20px;
+}
+
+#drop-area.highlight {
+    border-color: purple;
+}
+
+#progress-bar {
+    width: 100%;
+}
+
+#progress-thumbs-bar {
+    width: 100%;
+}
+
+#drop-zone .hidden {
+    display: none;
+}

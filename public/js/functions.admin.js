@@ -39,7 +39,6 @@ function addPhotos(files) {
                 return;
             }
 
-            console.log(data);
             if (data.Messages.count === 0) {
                 clearInterval(timeoutId);
                 return;
@@ -56,8 +55,11 @@ function addPhotos(files) {
                 };
 
                 sqs.deleteMessage(params, function (err, data) {
-                    if (err) console.log(err, err.stack);
-                    else console.log(data);
+                    if (err) {
+                        console.log(err, err.stack);
+                    } else {
+                        //console.log(data);
+                    }
                 });
 
                 if (thumbnailsFound == totalImages) {
@@ -129,16 +131,10 @@ function addPhoto(file, success, failed) {
 
 // admin functions
 function dragOverHandler(ev) {
-    console.log('File(s) in drop zone');
-
-    // Prevent default behavior (Prevent file from being opened)
     ev.preventDefault();
 }
 
 function dropHandler(ev) {
-    console.log('File(s) dropped');
-
-    // Prevent default behavior (Prevent file from being opened)
     ev.preventDefault();
 
     var files = [];

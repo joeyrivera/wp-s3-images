@@ -37,6 +37,7 @@ class Widget extends \WP_Widget
     public function widget($args, $instance)
     {
         wp_enqueue_script('awssdk', 'https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js');
+        wp_enqueue_style( 'jrs3imagescss', plugin_dir_url(__FILE__) . 'public/css/styles.css');
 
         $variables = [
             'bucket_name' => get_option('bucket_name'),
@@ -57,7 +58,7 @@ class Widget extends \WP_Widget
 
         // upload for admin
         if (current_user_can('administrator')) {
-            require_once 'upload.phtml';
+            require_once 'views/upload.phtml';
 
             // use elevated policy if admin
             $variables['queue_url'] = get_option('queue_url');
@@ -69,11 +70,11 @@ class Widget extends \WP_Widget
 
         echo $args['after_widget'];
 
-        wp_register_script('jrs3imagesjs', plugin_dir_url(__FILE__) . 'functions.js');
+        wp_register_script('jrs3imagesjs', plugin_dir_url(__FILE__) . 'public/js/functions.js');
         wp_localize_script('jrs3imagesjs', 'document_obj', $variables);
         wp_enqueue_script('jrs3imagesjs');
 
-        wp_enqueue_script( 'jrs3imagesadminjs', plugin_dir_url(__FILE__) . 'functions.admin.js');
+        wp_enqueue_script( 'jrs3imagesadminjs', plugin_dir_url(__FILE__) . 'public/js/functions.admin.js');
     }
 
     /**
@@ -84,7 +85,7 @@ class Widget extends \WP_Widget
         $title = (isset($instance['title'])) ? $instance['title'] : __($this->default_title,);
         $number_of_images = !empty($instance['number_of_images']) ? $instance['number_of_images'] : $this->default_number_of_images;
         
-        require_once 'widget.form.phtml';
+        require_once 'views/widget.form.phtml';
     }
 
     /**
@@ -92,6 +93,6 @@ class Widget extends \WP_Widget
      */
     public function create_plugin_settings_page()
     {
-        require_once 'settings.phtml';
+        require_once 'views/settings.phtml';
     }
 }
