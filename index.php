@@ -24,6 +24,7 @@ add_action('admin_init', function () use ($widget) {
     register_setting('jrs3images_option_group', 'bucket_region');
     register_setting('jrs3images_option_group', 'identity_pool_id_public');
     register_setting('jrs3images_option_group', 'identity_pool_id_admin');
+    register_setting('jrs3images_option_group', 'queue_url');
 });
 
 // register settings page

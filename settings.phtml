@@ -1,0 +1,32 @@
+<div>
+    <h2>Jr S3 Images</h2>
+    <form method="post" action="options.php">
+        <?php settings_fields('jrs3images_option_group'); ?>
+        <h3>Settings</h3>
+        <p>Configure the following to load and upload images to the correct S3 buckets.</p>
+        <table>
+            <tr valign="top">
+                <th scope="row"><label for="bucket_name">S3 Bucket Name</label></th>
+                <td><input type="text" id="bucket_name" name="bucket_name" value="<?= get_option('bucket_name'); ?>" /></td>
+            </tr>
+            <tr valign="top">
+                <th scope="row"><label for="bucket_region">S3 Bucket Region</label></th>
+                <td><input type="text" id="bucket_region" name="bucket_region" value="<?= get_option('bucket_region'); ?>" /></td>
+            </tr>
+            <tr valign="top">
+                <th scope="row"><label for="identity_pool_id_public">Identity Pool Id Public</label></th>
+                <td><input class="regular-text" type="text" id="identity_pool_id_public" name="identity_pool_id_public" value="<?= get_option('identity_pool_id_public'); ?>" /></td>
+            </tr>
+            <tr valign="top">
+                <th scope="row"><label for="identity_pool_id_admin">Identity Pool Id Private</label></th>
+                <td><input class="regular-text" type="text" id="identity_pool_id_admin" name="identity_pool_id_admin" value="<?= get_option('identity_pool_id_admin'); ?>" /></td>
+            </tr>
+
+            <tr valign="top">
+                <th scope="row"><label for="queue_url">SQS Queue Url</label></th>
+                <td><input class="regular-text" type="text" id="queue_url" name="queue_url" value="<?= get_option('queue_url'); ?>" /></td>
+            </tr>
+        </table>
+        <?php submit_button(); ?>
+    </form>
+</div>

@@ -1,0 +1,9 @@
+<p>
+    <label for="<?= $this->get_field_id('title'); ?>"><?php _e('Title:'); ?></label>
+    <input class="widefat" id="<?= $this->get_field_id('title'); ?>" name="<?= $this->get_field_name('title'); ?>" type="text" value="<?= esc_attr($title); ?>" />
+</p>
+
+<p>
+    <label for="<?= esc_attr($this->get_field_id('number_of_images')); ?>"><?php esc_attr_e('Number of images to show:', 'text_domain'); ?></label>
+    <input class="tiny-text" id="<?= esc_attr($this->get_field_id('number_of_images')); ?>" name="<?= esc_attr($this->get_field_name('number_of_images')); ?>" type="number" value="<?= esc_attr($number_of_images); ?>" step="1" min="1" size="3">
+</p>
