@@ -3,19 +3,20 @@
 namespace Jr\S3\Images;
 
 /**
- * 
+ * Plugin that allows uploading and listing images in an 
+ * S3 bucket
  */
 class Widget extends \WP_Widget
 {
     /**
      * default title to use for the widget
      */
-    protected $default_title = 'Images';
+    protected $default_title = 'Recent Images';
 
     /**
      * default number of images to display in the widget
      */
-    protected $default_number_of_images = 5;
+    protected $default_number_of_images = 12;
 
     /**
      * init the widget
@@ -37,7 +38,7 @@ class Widget extends \WP_Widget
     public function widget($args, $instance)
     {
         wp_enqueue_script('awssdk', 'https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js');
-        wp_enqueue_style( 'jrs3imagescss', plugin_dir_url(__FILE__) . 'public/css/styles.css');
+        wp_enqueue_style( 'jrs3imagescss', plugins_url('public/css/styles.css', __FILE__));
 
         $variables = [
             'bucket_name' => get_option('bucket_name'),
@@ -66,15 +67,15 @@ class Widget extends \WP_Widget
         }
 
         // template for images
-        echo "<ul id='app' style='list-style-type: none; margin: 0px'></ul>";
+        echo "<div id='app'></div>";
 
         echo $args['after_widget'];
 
-        wp_register_script('jrs3imagesjs', plugin_dir_url(__FILE__) . 'public/js/functions.js');
+        wp_register_script('jrs3imagesjs', plugins_url('public/js/functions.js', __FILE__));
         wp_localize_script('jrs3imagesjs', 'document_obj', $variables);
         wp_enqueue_script('jrs3imagesjs');
 
-        wp_enqueue_script( 'jrs3imagesadminjs', plugin_dir_url(__FILE__) . 'public/js/functions.admin.js');
+        wp_enqueue_script( 'jrs3imagesadminjs', plugins_url('public/js/functions.admin.js', __FILE__));
     }
 
     /**
@@ -84,8 +85,18 @@ class Widget extends \WP_Widget
     {
         $title = (isset($instance['title'])) ? $instance['title'] : __($this->default_title,);
         $number_of_images = !empty($instance['number_of_images']) ? $instance['number_of_images'] : $this->default_number_of_images;
-        
-        require_once 'views/widget.form.phtml';
+
+        ?>
+        <p>
+            <label for="<?= $this->get_field_id('title'); ?>"><?php _e('Title:'); ?></label>
+            <input class="widefat" id="<?= $this->get_field_id('title'); ?>" name="<?= $this->get_field_name('title'); ?>" type="text" value="<?= esc_attr($title); ?>" />
+        </p>
+
+        <p>
+            <label for="<?= esc_attr($this->get_field_id('number_of_images')); ?>"><?php esc_attr_e('Number of images to show:', 'text_domain'); ?></label>
+            <input class="tiny-text" id="<?= esc_attr($this->get_field_id('number_of_images')); ?>" name="<?= esc_attr($this->get_field_name('number_of_images')); ?>" type="number" value="<?= esc_attr($number_of_images); ?>" step="1" min="1" size="3">
+        </p>
+        <?php
     }
 
     /**

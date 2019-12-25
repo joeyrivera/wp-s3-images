@@ -22,3 +22,7 @@
 #drop-zone .hidden {
     display: none;
 }
+
+#app img {
+    width: 32%;
+}
