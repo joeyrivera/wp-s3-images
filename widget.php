@@ -85,7 +85,6 @@ class Widget extends \WP_Widget
     {
         $title = (isset($instance['title'])) ? $instance['title'] : __($this->default_title,);
         $number_of_images = !empty($instance['number_of_images']) ? $instance['number_of_images'] : $this->default_number_of_images;
-
         ?>
         <p>
             <label for="<?= $this->get_field_id('title'); ?>"><?php _e('Title:'); ?></label>

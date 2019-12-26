@@ -1,3 +1,6 @@
+// drop area element
+var dropArea = document.getElementById('drop-area');
+
 // Create an SQS service object
 var sqs = new AWS.SQS({ 
     apiVersion: '2012-11-05'
@@ -19,10 +22,11 @@ var sqsParams = {
 
 /**
  * @todo only retry so many times to find thumbnails
- * @param {*} files 
+ * @param {Array.<File>} files 
  */
 function addPhotos(files) {
     var totalImages = files.length;
+    var imageKeys = [];
     var uploadedImages = 0;
     var thumbnailsFound = 0;
     var timeoutId = null;
@@ -45,6 +49,15 @@ function addPhotos(files) {
             }
 
             data.Messages.forEach(message => {
+
+                var json = JSON.parse(message.Body);
+                var index = imageKeys.indexOf(json.Records[0].s3.object.key);
+                
+                if (index === -1) {
+                    return;
+                }
+
+                imageKeys.splice(index, 1);
                 thumbnailsFound++;
                 progressThumbsBar.value = thumbnailsFound / totalImages * 100;
 
@@ -71,7 +84,8 @@ function addPhotos(files) {
         });
     };
 
-    var success = function () {
+    var success = function (file) {
+        imageKeys.push(file.key);
         uploadedImages++;
         progressBar.value = uploadedImages / totalImages * 100;
 
@@ -88,6 +102,7 @@ function addPhotos(files) {
     };
 
     var resetProgress = function () {
+        imageKeys = [];
         uploadedImages = 0;
         thumbnailsFound = 0;
         timeoutIds = [];
@@ -107,9 +122,14 @@ function addPhotos(files) {
     });
 }
 
+/**
+ * 
+ * @param {File} file 
+ * @param {Function} success 
+ * @param {Function} failed 
+ */
 function addPhoto(file, success, failed) {
     var fileName = file.name.replace(/[^\w\.]/gi, '_');
-    var photoKey = fileName;
 
     // create new file with the new clean name
     var newFile = new File([file], fileName, { type: file.type });
@@ -118,7 +138,7 @@ function addPhoto(file, success, failed) {
     var upload = new AWS.S3.ManagedUpload({
         params: {
             Bucket: imagesBucketName,
-            Key: photoKey,
+            Key: fileName,
             Body: newFile,
             ACL: "public-read"
         }
@@ -129,11 +149,20 @@ function addPhoto(file, success, failed) {
     promise.then(success, failed);
 }
 
-// admin functions
+/**
+ * Stop default drag over behavior
+ * 
+ * @param {DragEvent}
+ */
 function dragOverHandler(ev) {
     ev.preventDefault();
 }
 
+/**
+ * stop default file drop behavior
+ * 
+ * @param {DropEvent}
+ */
 function dropHandler(ev) {
     ev.preventDefault();
 
@@ -167,6 +196,11 @@ function dropHandler(ev) {
     }
 }
 
+/**
+ * Make sure the file is a valid image type
+ * 
+ * @param {File} file 
+ */
 function validateImageFile(file) {
     if (typeof file['type'] !== 'undefined' && file.type.startsWith('image/')) {
         return true;
@@ -175,9 +209,9 @@ function validateImageFile(file) {
     return false;
 }
 
-// only if admin
-let dropArea = document.getElementById('drop-area');
-
+/**
+ * add drag event listeneres
+ */
 ;['dragenter', 'dragover'].forEach(eventName => {
     if (dropArea === null) {
         return;
@@ -185,6 +219,9 @@ let dropArea = document.getElementById('drop-area');
     dropArea.addEventListener(eventName, highlight, false);
 })
 
+/**
+ * add drop event listeneres
+ */
 ;['dragleave', 'drop'].forEach(eventName => {
     if (dropArea === null) {
         return;
@@ -192,10 +229,18 @@ let dropArea = document.getElementById('drop-area');
     dropArea.addEventListener(eventName, unhighlight, false);
 })
 
+/**
+ * Add class
+ * @param {DragEvent} e 
+ */
 function highlight(e) {
     dropArea.classList.add('highlight');
 }
 
+/**
+ * Remove class
+ * @param {DragEvent} e 
+ */
 function unhighlight(e) {
     dropArea.classList.remove('highlight');
 }
