@@ -3,19 +3,20 @@
 namespace Jr\S3\Images;
 
 /**
- * 
+ * Plugin that allows uploading and listing images in an 
+ * S3 bucket
  */
 class Widget extends \WP_Widget
 {
     /**
      * default title to use for the widget
      */
-    protected $default_title = 'Images';
+    protected $default_title = 'Recent Images';
 
     /**
      * default number of images to display in the widget
      */
-    protected $default_number_of_images = 5;
+    protected $default_number_of_images = 12;
 
     /**
      * init the widget
@@ -36,10 +37,14 @@ class Widget extends \WP_Widget
      */
     public function widget($args, $instance)
     {
+        wp_enqueue_script('awssdk', 'https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js');
+        wp_enqueue_style( 'jrs3imagescss', plugins_url('public/css/styles.css', __FILE__));
+
         $variables = [
             'bucket_name' => get_option('bucket_name'),
             'bucket_region' => get_option('bucket_region'),
             'identity_pool_id' => get_option('identity_pool_id_public'),
+            'queueURL' => null,
             'number_of_images' => ($instance['number_of_images'] ?? $this->default_number_of_images)
         ];
 
@@ -54,23 +59,23 @@ class Widget extends \WP_Widget
 
         // upload for admin
         if (current_user_can('administrator')) {
-            echo '<input id="photoupload" type="file" accept="image/*">'
-                . '<button id="addphoto" onclick="addPhoto()">Add Photo</button>';
+            require_once 'views/upload.phtml';
 
             // use elevated policy if admin
+            $variables['queue_url'] = get_option('queue_url');
             $variables['identity_pool_id'] = get_option('identity_pool_id_admin');
         }
 
         // template for images
-        echo "<ul id='app' style='list-style-type: none; margin: 0px'></ul>";
+        echo "<div id='app'></div>";
 
         echo $args['after_widget'];
 
-        // register JS files
-        wp_enqueue_script('awssdk', 'https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js');
-        wp_register_script('jrs3imagesjs', plugin_dir_url(__FILE__) . 'functions.js');  
+        wp_register_script('jrs3imagesjs', plugins_url('public/js/functions.js', __FILE__));
         wp_localize_script('jrs3imagesjs', 'document_obj', $variables);
         wp_enqueue_script('jrs3imagesjs');
+
+        wp_enqueue_script( 'jrs3imagesadminjs', plugins_url('public/js/functions.admin.js', __FILE__));
     }
 
     /**
@@ -80,52 +85,24 @@ class Widget extends \WP_Widget
     {
         $title = (isset($instance['title'])) ? $instance['title'] : __($this->default_title,);
         $number_of_images = !empty($instance['number_of_images']) ? $instance['number_of_images'] : $this->default_number_of_images;
-?>
+        ?>
         <p>
-            <label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:'); ?></label>
-            <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>" />
+            <label for="<?= $this->get_field_id('title'); ?>"><?php _e('Title:'); ?></label>
+            <input class="widefat" id="<?= $this->get_field_id('title'); ?>" name="<?= $this->get_field_name('title'); ?>" type="text" value="<?= esc_attr($title); ?>" />
         </p>
 
         <p>
-            <label for="<?php echo esc_attr($this->get_field_id('number_of_images')); ?>"><?php esc_attr_e('Number of images to show:', 'text_domain'); ?></label>
-            <input class="tiny-text" id="<?php echo esc_attr($this->get_field_id('number_of_images')); ?>" name="<?php echo esc_attr($this->get_field_name('number_of_images')); ?>" type="number" value="<?php echo esc_attr($number_of_images); ?>" step="1" min="1" size="3">
+            <label for="<?= esc_attr($this->get_field_id('number_of_images')); ?>"><?php esc_attr_e('Number of images to show:', 'text_domain'); ?></label>
+            <input class="tiny-text" id="<?= esc_attr($this->get_field_id('number_of_images')); ?>" name="<?= esc_attr($this->get_field_name('number_of_images')); ?>" type="number" value="<?= esc_attr($number_of_images); ?>" step="1" min="1" size="3">
         </p>
-    <?php
+        <?php
     }
-    
+
     /**
      * show a form under settings to set params
      */
     public function create_plugin_settings_page()
     {
-    ?>
-        <div>
-            <h2>Jr S3 Images</h2>
-            <form method="post" action="options.php">
-                <?php settings_fields('jrs3images_option_group'); ?>
-                <h3>Settings</h3>
-                <p>Configure the following to load and upload images to the correct S3 buckets.</p>
-                <table>
-                    <tr valign="top">
-                        <th scope="row"><label for="bucket_name">S3 Bucket Name</label></th>
-                        <td><input type="text" id="bucket_name" name="bucket_name" value="<?php echo get_option('bucket_name'); ?>" /></td>
-                    </tr>
-                    <tr valign="top">
-                        <th scope="row"><label for="bucket_region">S3 Bucket Region</label></th>
-                        <td><input type="text" id="bucket_region" name="bucket_region" value="<?php echo get_option('bucket_region'); ?>" /></td>
-                    </tr>
-                    <tr valign="top">
-                        <th scope="row"><label for="identity_pool_id_public">Identity Pool Id Public</label></th>
-                        <td><input class="regular-text" type="text" id="identity_pool_id_public" name="identity_pool_id_public" value="<?php echo get_option('identity_pool_id_public'); ?>" /></td>
-                    </tr>
-                    <tr valign="top">
-                        <th scope="row"><label for="identity_pool_id_admin">Identity Pool Id Private</label></th>
-                        <td><input class="regular-text" type="text" id="identity_pool_id_admin" name="identity_pool_id_admin" value="<?php echo get_option('identity_pool_id_admin'); ?>" /></td>
-                    </tr>
-                </table>
-                <?php submit_button(); ?>
-            </form>
-        </div>
-<?php
+        require_once 'views/settings.phtml';
     }
 }

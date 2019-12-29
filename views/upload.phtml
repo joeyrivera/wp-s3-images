@@ -1,0 +1,13 @@
+<div id="drop-zone">
+    <div id="drop-area" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+        Drag images here to upload
+    </div>
+
+    <div class="hidden">
+        <span id="progress-text">Upload Progress:</span>
+        <progress id="progress-bar" max=100 value=0></progress>
+
+        <span id="progress-thumbs-text">Thumbnails Progress:</span>
+        <progress id="progress-thumbs-bar" max=100 value=0></progress>
+    </div>
+</div>
