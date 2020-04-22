@@ -16,8 +16,8 @@ var sqsParams = {
         "All"
     ],
     MaxNumberOfMessages: 10,
-    WaitTimeSeconds: 0,
-    VisibilityTimeout: 20,
+    WaitTimeSeconds: 1,
+    VisibilityTimeout: 30,
 };
 
 /**
@@ -85,7 +85,7 @@ function addPhotos(files) {
     };
 
     var success = function (file) {
-        imageKeys.push(file.key);
+        imageKeys.push(file.Key);
         uploadedImages++;
         progressBar.value = uploadedImages / totalImages * 100;
 
@@ -93,7 +93,7 @@ function addPhotos(files) {
             progressText.innerHTML = 'Waiting for thumbnails.';
 
             // start checking sqs
-            timeoutId = setInterval(pollForThumb, 1000);
+            timeoutId = setInterval(pollForThumb, 2000);
         }
     };
 
