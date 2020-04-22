@@ -2,7 +2,7 @@
 
 /**
  * Plugin Name: JR S3 Images
- * Plugin URI: https://github.com/joeyrivera/jr-s3-images
+ * Plugin URI: https://github.com/joeyrivera/wp-s3-images
  * Description: View and upload images in AWS S3 bucket
  * Version: 1.0
  * Author: Joey Rivera
